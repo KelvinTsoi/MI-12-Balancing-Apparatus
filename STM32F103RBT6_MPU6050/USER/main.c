@@ -38,26 +38,76 @@ uint32_t g_byDmaBufferCurrentTab = 0;
 
 float pitch, roll, yaw = 0;
 
+
+void EXTI0_IRQHandler(void)
+{
+  if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+  {
+    if(mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
+    {
+      Encode(LEFT_HAND_SIDE, pitch, roll, yaw, UART1TxBuffer);
+      SendMsg(UART1TxBuffer, sizeof(UART1TxBuffer));
+    }
+		EXTI_ClearITPendingBit(EXTI_Line0);
+  }
+}
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+void Alpha_Sensor_Exint(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+  EXTI_InitTypeDef EXTI_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_0;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  EXTI_ClearITPendingBit(EXTI_Line0);
+  GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource0);
+  EXTI_InitStructure.EXTI_Line = EXTI_Line0;
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStructure);
+
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+  NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+}
+
 /**
   * @brief  Main program.
   * @param  None
   * @retval None
   */
 int main(void)
-{	
-	int ret = 0;
+{
+  int ret = 0;
 
-	delay_init();
+  delay_init();
 	
-	USART1_Init(115200);
+	Alpha_Sensor_Exint();
 
-  if((ret=MPU_Init())!=0)
-	{
-		//printf("MPU6050 Init Error! Error code [%d]\r\n", ret);
-		assert_failed((uint8_t *)__FILE__, __LINE__);
-	}
+  USART1_Init(115200);
 
-  while((ret=mpu_dmp_init())!=0)
+  if((ret = MPU_Init()) != 0)
+  {
+    //printf("MPU6050 Init Error! Error code [%d]\r\n", ret);
+    assert_failed((uint8_t *)__FILE__, __LINE__);
+  }
+
+  while((ret = mpu_dmp_init()) != 0)
   {
     //printf("MPU6050 DMP Init Error! Error code [%d], Try again!\r\n");
     delay_ms(200);
@@ -65,13 +115,7 @@ int main(void)
 
   /* Infinite loop */
   while (1)
-  {
-    if(mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
-    {
-			Encode(LEFT_HAND_SIDE, pitch, roll, yaw, UART1TxBuffer);
-			SendMsg(UART1TxBuffer, sizeof(UART1TxBuffer));
-    }
-  }
+  {}
 }
 
 #ifdef  USE_FULL_ASSERT
