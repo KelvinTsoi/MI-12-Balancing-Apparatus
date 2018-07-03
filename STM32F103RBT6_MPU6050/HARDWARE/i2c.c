@@ -8,17 +8,31 @@ void MPU_IIC_Delay(void)
 
 void MPU_IIC_Init(void)
 {
+	#if 0
   GPIO_InitTypeDef  GPIO_InitStructure;
 
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 
   GPIO_SetBits(GPIOB, GPIO_Pin_10 | GPIO_Pin_11);
+	#endif
+	
+	#if 1
+	GPIO_InitTypeDef  GPIO_InitStructure;
 
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); 
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+	
+  GPIO_SetBits(GPIOB, GPIO_Pin_6 | GPIO_Pin_7);
+	#endif
 }
 
 void MPU_IIC_Start(void)
@@ -121,29 +135,3 @@ u8 MPU_IIC_Read_Byte(unsigned char ack)
     MPU_IIC_Ack();
   return receive;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

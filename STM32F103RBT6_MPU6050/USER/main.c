@@ -43,12 +43,29 @@ void EXTI0_IRQHandler(void)
 {
   if(EXTI_GetITStatus(EXTI_Line0) != RESET)
   {
+		#if 1
     if(mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
     {
       Encode(LEFT_HAND_SIDE, pitch, roll, yaw, UART1TxBuffer);
       SendMsg(UART1TxBuffer, sizeof(UART1TxBuffer));
     }
+		#endif
 		EXTI_ClearITPendingBit(EXTI_Line0);
+  }
+}
+
+void EXTI1_IRQHandler(void)
+{
+  if(EXTI_GetITStatus(EXTI_Line1) != RESET)
+  {
+		#if 1
+		if(mpu_dmp_get_data(&pitch, &roll, &yaw) == 0)
+    {
+      Encode(LEFT_HAND_SIDE, pitch, roll, yaw, UART1TxBuffer);
+      SendMsg(UART1TxBuffer, sizeof(UART1TxBuffer));
+    }
+		#endif
+		EXTI_ClearITPendingBit(EXTI_Line1);
   }
 }
 
@@ -87,6 +104,40 @@ void Alpha_Sensor_Exint(void)
 }
 
 /**
+  * @brief
+  * @param
+  * @retval
+  */
+void Beta_Sensor_Exint(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+  EXTI_InitTypeDef EXTI_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_1;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  EXTI_ClearITPendingBit(EXTI_Line1);
+  GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource1);
+  EXTI_InitStructure.EXTI_Line = EXTI_Line1;
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  EXTI_Init(&EXTI_InitStructure);
+
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+  NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+}
+
+/**
   * @brief  Main program.
   * @param  None
   * @retval None
@@ -94,10 +145,12 @@ void Alpha_Sensor_Exint(void)
 int main(void)
 {
   int ret = 0;
-
+	
+	#if 1
   delay_init();
 	
-	Alpha_Sensor_Exint();
+	//Alpha_Sensor_Exint();
+	Beta_Sensor_Exint();
 
   USART1_Init(115200);
 
@@ -112,6 +165,7 @@ int main(void)
     //printf("MPU6050 DMP Init Error! Error code [%d], Try again!\r\n");
     delay_ms(200);
   }
+	#endif
 
   /* Infinite loop */
   while (1)
