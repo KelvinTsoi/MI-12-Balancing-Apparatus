@@ -1,8 +1,8 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
 
-#include "i2c.h"   												  	  
- 
+#include "i2c.h"
+
 #define MPU_SELF_TESTX_REG		0X0D
 #define MPU_SELF_TESTY_REG		0X0E
 #define MPU_SELF_TESTZ_REG		0X0F
@@ -66,22 +66,29 @@
 
 #define MPU_ADDR				0X68
 
-u8 MPU_Init(void);
-u8 MPU_Write_Len(u8 addr,u8 reg,u8 len,u8 *buf);
-u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf);
-u8 MPU_Write_Byte(u8 reg,u8 data);
-u8 MPU_Read_Byte(u8 reg);
+u8 MPU_Init(int type);
 
-u8 MPU_Set_Gyro_Fsr(u8 fsr);
-u8 MPU_Set_Accel_Fsr(u8 fsr);
-u8 MPU_Set_LPF(u16 lpf);
-u8 MPU_Set_Rate(u16 rate);
-u8 MPU_Set_Fifo(u8 sens);
+u8 MPU_Write_Len(u8 addr, u8 reg, u8 len, u8 *buf, int type);
 
+u8 MPU_Read_Len(u8 addr, u8 reg, u8 len, u8 *buf, int type);
 
-short MPU_Get_Temperature(void);
-u8 MPU_Get_Gyroscope(short *gx,short *gy,short *gz);
-u8 MPU_Get_Accelerometer(short *ax,short *ay,short *az);
+u8 MPU_Write_Byte(u8 reg, u8 data, int type);
+
+u8 MPU_Read_Byte(u8 reg, int type);
+
+u8 MPU_Set_Gyro_Fsr(u8 fsr, int type);
+
+u8 MPU_Set_Accel_Fsr(u8 fsr, int type);
+
+u8 MPU_Set_LPF(u16 lpf, int type);
+
+u8 MPU_Set_Rate(u16 rate, int type);
+
+short MPU_Get_Temperature(int type);
+
+u8 MPU_Get_Gyroscope(short *gx, short *gy, short *gz, int type);
+
+u8 MPU_Get_Accelerometer(short *ax, short *ay, short *az, int type);
 
 #endif
 

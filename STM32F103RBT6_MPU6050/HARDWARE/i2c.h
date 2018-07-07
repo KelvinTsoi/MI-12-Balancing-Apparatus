@@ -2,49 +2,40 @@
 #define __MPUIIC_H
 #include "sys.h"
 
-#if 0
+#define ALPHA_SENSOR	0
+#define BETA_SENSOR		1
 
-#define MPU_IIC_SCL    PBout(10)
-#define MPU_IIC_SDA    PBout(11)
-#define MPU_READ_SDA   PBin(11)
+#define ALPHA_IIC_SCL    PBout(6)
+#define ALPHA_IIC_SDA    PBout(7)
+#define ALPHA_READ_SDA   PBin(7)
 
-#define MPU_SDA_IN()  {GPIOB->CRH&=0XFFFF0FFF;GPIOB->CRH|=8<<12;}
-#define MPU_SDA_OUT() {GPIOB->CRH&=0XFFFF0FFF;GPIOB->CRH|=3<<12;}
+#define ALPHA_SDA_IN()  {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)8<<28;} 
+#define ALPHA_SDA_OUT() {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)3<<28;}
 
-#endif
+#define BETA_IIC_SCL    PBout(10)
+#define BETA_IIC_SDA    PBout(11)
+#define BETA_READ_SDA   PBin(11)
 
-#if 1
+#define BETA_SDA_IN()  {GPIOB->CRH&=0XFFFF0FFF;GPIOB->CRH|=8<<12;}
+#define BETA_SDA_OUT() {GPIOB->CRH&=0XFFFF0FFF;GPIOB->CRH|=3<<12;}
 
-#define MPU_IIC_SCL    PBout(6)
-#define MPU_IIC_SDA    PBout(7)
-#define MPU_READ_SDA   PBin(7)
+void IIC_Delay(void);
 
-#define MPU_SDA_IN()  {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)8<<28;} 
-#define MPU_SDA_OUT() {GPIOB->CRL&=0X0FFFFFFF;GPIOB->CRL|=(u32)3<<28;}
+int MPU_IIC_Init(int type);
 
-#endif
+void MPU_IIC_Start(int type);
 
-void MPU_IIC_Delay(void);
+void MPU_IIC_Stop(int type);
 
-void MPU_IIC_Init(void);
+void MPU_IIC_Send_Byte(u8 txd, int type);
 
-void MPU_IIC_Start(void);
+u8 MPU_IIC_Read_Byte(unsigned char ack, int type);
 
-void MPU_IIC_Stop(void);
+u8 MPU_IIC_Wait_Ack(int type);
 
-void MPU_IIC_Send_Byte(u8 txd);
+void MPU_IIC_Ack(int type);
 
-u8 MPU_IIC_Read_Byte(unsigned char ack);
-
-u8 MPU_IIC_Wait_Ack(void);
-
-void MPU_IIC_Ack(void);
-
-void MPU_IIC_NAck(void);
-
-void IMPU_IC_Write_One_Byte(u8 daddr, u8 addr, u8 data);
-
-u8 MPU_IIC_Read_One_Byte(u8 daddr, u8 addr);
+void MPU_IIC_NAck(int type);
 
 #endif
 

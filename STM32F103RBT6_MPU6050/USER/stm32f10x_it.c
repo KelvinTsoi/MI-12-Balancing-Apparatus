@@ -166,12 +166,12 @@ void USART1_IRQHandler(void)
 		USART_ClearITPendingBit(USART1,USART_IT_TC);
 		
 		DMA_ClearITPendingBit(DMA1_IT_TC4);
-
-		g_byDmaBufferCurrentTab = 0;
 		
 		DMA_Cmd(DMA1_Channel4,DISABLE);
 		
 		g_IsUartTxBusy = 0;
+		
+		g_byDmaBufferCurrentTab = 0;
 	}
 	
 	if(USART_GetITStatus(USART1,USART_IT_RXNE) != RESET) 
